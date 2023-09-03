@@ -1,8 +1,8 @@
 {
     "id": "ProdMonitor",
     "name": "Production Monitor",
-    "version_name": "0.1.3",
-    "version_code": 1003,
+    "version_name": "0.1.4",
+    "version_code": 1004,
     "author": "Moekumo",
     "homepage": "",
     "description": "Provides additional production and consumption satisfaction metrics.",
