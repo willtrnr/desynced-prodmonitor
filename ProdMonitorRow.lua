@@ -1,7 +1,7 @@
 local ProdMonitorRow_layout<const> = [[
     <Box bg=popup_additional_bg padding=8>
         <HorizontalList child_align=center>
-            <VerticalList child_align=center margin_right=6 fill=true>
+            <VerticalList child_align=center margin_right=6 fill=true on_click={on_item_click}>
                 <Image image={item_icon} width=38 height=38 />
                 <Text text={item_name} size=8 />
             </VerticalList>
@@ -76,6 +76,8 @@ UI.Register("ProdMonitorRow", ProdMonitorRow_layout, ProdMonitorRow)
 function ProdMonitorRow:construct()
     if not self.item_def then
         self.item_def = data.all[self.item_id]
+    else
+        self.item_id = self.item_def.id
     end
 
     if self.item_def then
@@ -91,6 +93,10 @@ function ProdMonitorRow:construct()
     if self.consumption_max >= self.production_max then
         self.cons_max_cell.value_color = "yellow"
     end
+end
+
+function ProdMonitorRow:on_item_click()
+   OpenMainWindow("Faction", { show_item_id = self.item_id })
 end
 
 local ProdMonitorCell_layout<const> = [[
