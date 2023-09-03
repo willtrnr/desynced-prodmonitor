@@ -1,0 +1,19 @@
+{
+    "id": "ProdMonitor",
+    "name": "Production Monitor",
+    "version_name": "0.1.2",
+    "version_code": 1002,
+    "author": "Moekumo",
+    "homepage": "",
+    "description": "Provides additional production and consumption satisfaction metrics.",
+    "packages": {
+        "UI": {
+            "name": "UI",
+            "entry": "ui.lua",
+            "dependencies": [
+                "Main/UI"
+            ],
+            "type": "Addon"
+        }
+    }
+}
