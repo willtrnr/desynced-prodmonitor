@@ -19,7 +19,8 @@ function get_logistic_data(faction)
     end
 
     for _, comp in ipairs(faction:GetComponents()) do
-        local reg_def = comp.def and comp.def.registers and comp.def.registers[1]
+        local comp_def = comp.def
+        local reg_def = comp_def and comp.def.registers and comp.def.registers[1]
         if reg_def then
             local reg = comp:GetRegister(1)
             if reg and not reg.is_empty then
@@ -51,6 +52,15 @@ function get_logistic_data(faction)
                     end
                 end
             end
+        elseif comp_def.extracts then
+            local item = get_item(comp_def.extracts)
+            if item then
+                table.insert(item.producers, {
+                    component = comp,
+                    amount = 1,
+                    ticks = comp_def.extraction_time,
+                })
+            end
         end
     end
 
@@ -60,13 +70,32 @@ end
 function get_item_stats(faction)
     local logistics = get_logistic_data(faction)
 
+    local window_start = Map.GetTick() - TICKS_PER_MINUTE
+
     local stats = {}
-    for _, item_id in ipairs(faction.unlocked_items) do
+    for item_id, _ in pairs(faction.all_items) do
         local item = logistics[item_id]
         if item then
+            local history = faction:GetItemHistory(item_id, 1, TICKS_PER_MINUTE)
+            local history_start = history.tick - TICKS_PER_MINUTE
+
+            local prod_rate = 0
+            for i, n in ipairs(history.total_added) do
+                if history_start + ((i - 1) * history.step) >= window_start then
+                    prod_rate = prod_rate + (n / TICKS_PER_MINUTE)
+                end
+            end
+
             local prod_max = 0
             for _, prod in ipairs(item.producers) do
                 prod_max = prod_max + (TICKS_PER_SECOND / prod.ticks * prod.amount)
+            end
+
+            local cons_rate = 0
+            for i, n in ipairs(history.total_removed) do
+                if history_start + ((i - 1) * history.step) >= window_start then
+                    cons_rate = cons_rate + (n / TICKS_PER_MINUTE)
+                end
             end
 
             local cons_max = 0
@@ -77,12 +106,14 @@ function get_item_stats(faction)
             stats[item_id] = {
                 item_def = item.item_def,
 
+                window_start = window_start,
+
                 producers = #item.producers,
-                production = 0,
+                production = prod_rate,
                 production_max = prod_max,
 
                 consumers = #item.consumers,
-                consumption = 0,
+                consumption = cons_rate,
                 consumption_max = cons_max,
             }
         end
