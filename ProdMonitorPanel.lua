@@ -9,7 +9,7 @@ local item_tags<const> = {
 }
 
 local ProdMonitorPanel_layout<const> = [[
-    <Box bg=popup_pattern padding=4 width=420 min_height=480 max_height=600>
+    <Box bg=popup_pattern padding=4 width=435 min_height=600 max_height=600>
         <VerticalList child_padding=4>
             <TextSearch on_refresh={update} />
             <ScrollList id=item_list fill=true child_padding=3 />
@@ -56,7 +56,7 @@ function ProdMonitorPanel:refresh()
     for _, item_stats in pairs(stats) do
         local list = get_list(item_stats.item_def)
         if list and item_filter(item_stats.item_def) then
-            -- TODO Add toggle for per-second instead of per-minute
+            -- TODO Add toggle for per-second instead of per-minute... maybe
             list:Add("ProdMonitorRow", {
                 item_def = item_stats.item_def,
 

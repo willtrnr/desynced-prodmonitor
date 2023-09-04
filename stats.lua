@@ -20,39 +20,59 @@ function get_logistic_data(faction)
 
     for _, comp in ipairs(faction:GetComponents()) do
         local comp_def = comp.def
-        local reg_def = comp_def and comp.def.registers and comp.def.registers[1]
+        local reg_def = comp_def and comp_def.registers and comp_def.registers[1]
         if reg_def then
             local reg = comp:GetRegister(1)
             if reg and not reg.is_empty then
-                local item = get_item(reg.item_id)
-                if item then
-                    if reg_def.type == "miner" then
-                        table.insert(item.producers, {
-                            component = comp,
-                            amount = 1,
-                            ticks = item.item_def.mining_recipe[comp.id],
-                        })
-                    elseif reg_def.type == "production" then
-                        local ticks = item.item_def.production_recipe.producers[comp.id]
-                        table.insert(item.producers, {
-                            component = comp,
-                            amount = item.item_def.production_recipe.amount,
-                            ticks = ticks,
-                        })
-                        for ingredient_id, amount in pairs(item.item_def.production_recipe.ingredients) do
-                            local ingredient = get_item(ingredient_id)
-                            if ingredient then
-                                table.insert(ingredient.consumers, {
+                if comp_def.id == "c_uplink" then
+                    -- Special case for Uplink component, there's no special register type for
+                    -- research apparently.
+                    local tech_def = data.techs[reg.tech_id]
+                    if tech_def  then
+                        for item_id, amount in pairs(tech_def.uplink_recipe.ingredients) do
+                            local item = get_item(item_id)
+                            if item then
+                                table.insert(item.consumers, {
                                     component = comp,
                                     amount = amount,
-                                    ticks = ticks,
+                                    ticks = tech_def.uplink_recipe.ticks,
                                 })
+                            end
+                        end
+                    end
+                elseif reg.item_id then
+                    -- Regular item production
+                    local item = get_item(reg.item_id)
+                    if item then
+                        if reg_def.type == "miner" then
+                            table.insert(item.producers, {
+                                component = comp,
+                                amount = 1,
+                                ticks = item.item_def.mining_recipe[comp.id],
+                            })
+                        elseif reg_def.type == "production" then
+                            local ticks = item.item_def.production_recipe.producers[comp.id]
+                            table.insert(item.producers, {
+                                component = comp,
+                                amount = item.item_def.production_recipe.amount,
+                                ticks = ticks,
+                            })
+                            for item_id, amount in pairs(item.item_def.production_recipe.ingredients) do
+                                local item = get_item(item_id)
+                                if item then
+                                    table.insert(item.consumers, {
+                                        component = comp,
+                                        amount = amount,
+                                        ticks = ticks,
+                                    })
+                                end
                             end
                         end
                     end
                 end
             end
         elseif comp_def.extracts then
+            -- "Passive" extractors don't have registers
             local item = get_item(comp_def.extracts)
             if item then
                 table.insert(item.producers, {
@@ -73,7 +93,7 @@ function get_item_stats(faction)
     local window_start = Map.GetTick() - TICKS_PER_MINUTE
 
     local stats = {}
-    for item_id, _ in pairs(faction.all_items) do
+    for _, item_id in ipairs(faction.unlocked_items) do
         local item = logistics[item_id]
         if item then
             local history = faction:GetItemHistory(item_id, 1, TICKS_PER_MINUTE)
