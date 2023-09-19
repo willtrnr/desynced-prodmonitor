@@ -7,7 +7,9 @@ function get_logistic_data(faction)
         local item = res[item_id]
         if not item then
             local item_def = data.items[item_id]
-            if not item_def then return nil end
+            if not item_def then
+                return nil
+            end
             item = {
                 item_def = item_def,
                 producers = {},
@@ -40,9 +42,9 @@ function get_logistic_data(faction)
                             end
                         end
                     end
-                elseif reg.item_id then
+                elseif reg.item_id or reg.raw_entity then
                     -- Regular item production
-                    local item = get_item(reg.item_id)
+                    local item = get_item(reg.item_id or GetResourceHarvestItemId(reg.raw_entity))
                     if item then
                         if reg_def.type == "miner" then
                             table.insert(item.producers, {
