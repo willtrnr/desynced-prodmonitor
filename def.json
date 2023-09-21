@@ -9,11 +9,12 @@
     "packages": {
         "UI": {
             "name": "UI",
+            "type": "Addon",
             "entry": "ui.lua",
             "dependencies": [
+                "Main/Data",
                 "Main/UI"
-            ],
-            "type": "Addon"
+            ]
         }
     }
 }

@@ -46,27 +46,33 @@ function get_logistic_data(faction)
                     -- Regular item production
                     local item = get_item(reg.item_id or GetResourceHarvestItemId(reg.raw_entity))
                     if item then
-                        if reg_def.type == "miner" then
-                            table.insert(item.producers, {
-                                component = comp,
-                                amount = 1,
-                                ticks = item.item_def.mining_recipe[comp.id],
-                            })
-                        elseif reg_def.type == "production" then
+                        -- WARN: It's possible to set an invalid recipe through signals and links, coherence must be double checked
+                        if reg_def.type == "miner" and item.item_def.mining_recipe then
+                            local ticks = item.item_def.mining_recipe[comp.id]
+                            if ticks ~= nil then
+                                table.insert(item.producers, {
+                                    component = comp,
+                                    amount = 1,
+                                    ticks = ticks,
+                                })
+                            end
+                        elseif reg_def.type == "production" and item.item_def.production_recipe then
                             local ticks = item.item_def.production_recipe.producers[comp.id]
-                            table.insert(item.producers, {
-                                component = comp,
-                                amount = item.item_def.production_recipe.amount,
-                                ticks = ticks,
-                            })
-                            for item_id, amount in pairs(item.item_def.production_recipe.ingredients) do
-                                local item = get_item(item_id)
-                                if item then
-                                    table.insert(item.consumers, {
-                                        component = comp,
-                                        amount = amount,
-                                        ticks = ticks,
-                                    })
+                            if ticks ~= nil then
+                                table.insert(item.producers, {
+                                    component = comp,
+                                    amount = item.item_def.production_recipe.amount,
+                                    ticks = ticks,
+                                })
+                                for item_id, amount in pairs(item.item_def.production_recipe.ingredients) do
+                                    local item = get_item(item_id)
+                                    if item then
+                                        table.insert(item.consumers, {
+                                            component = comp,
+                                            amount = amount,
+                                            ticks = ticks,
+                                        })
+                                    end
                                 end
                             end
                         end
@@ -74,7 +80,7 @@ function get_logistic_data(faction)
                 end
             end
         elseif comp_def.extracts then
-            -- "Passive" extractors don't have registers
+            -- "Passive" extractors don't use registers for production
             local item = get_item(comp_def.extracts)
             if item then
                 table.insert(item.producers, {
@@ -95,50 +101,47 @@ function get_item_stats(faction)
     local window_start = Map.GetTick() - TICKS_PER_MINUTE
 
     local stats = {}
-    for _, item_id in ipairs(faction.unlocked_items) do
-        local item = logistics[item_id]
-        if item then
-            local history = faction:GetItemHistory(item_id, 1, TICKS_PER_MINUTE)
-            local history_start = history.tick - TICKS_PER_MINUTE
+    for item_id, item in pairs(logistics) do
+        local history = faction:GetItemHistory(item_id, 1, TICKS_PER_MINUTE)
+        local history_start = history.tick - TICKS_PER_MINUTE
 
-            local prod_rate = 0
-            for i, n in ipairs(history.total_added) do
-                if history_start + ((i - 1) * history.step) >= window_start then
-                    prod_rate = prod_rate + (n / TICKS_PER_MINUTE)
-                end
+        local prod_rate = 0
+        for i, n in ipairs(history.total_added) do
+            if history_start + ((i - 1) * history.step) >= window_start then
+                prod_rate = prod_rate + (n / TICKS_PER_MINUTE)
             end
-
-            local prod_max = 0
-            for _, prod in ipairs(item.producers) do
-                prod_max = prod_max + (TICKS_PER_SECOND / prod.ticks * prod.amount)
-            end
-
-            local cons_rate = 0
-            for i, n in ipairs(history.total_removed) do
-                if history_start + ((i - 1) * history.step) >= window_start then
-                    cons_rate = cons_rate + (n / TICKS_PER_MINUTE)
-                end
-            end
-
-            local cons_max = 0
-            for _, cons in ipairs(item.consumers) do
-                cons_max = cons_max + (TICKS_PER_SECOND / cons.ticks * cons.amount)
-            end
-
-            stats[item_id] = {
-                item_def = item.item_def,
-
-                window_start = window_start,
-
-                producers = #item.producers,
-                production = prod_rate,
-                production_max = prod_max,
-
-                consumers = #item.consumers,
-                consumption = cons_rate,
-                consumption_max = cons_max,
-            }
         end
+
+        local prod_max = 0
+        for _, prod in ipairs(item.producers) do
+            prod_max = prod_max + (TICKS_PER_SECOND / prod.ticks * prod.amount)
+        end
+
+        local cons_rate = 0
+        for i, n in ipairs(history.total_removed) do
+            if history_start + ((i - 1) * history.step) >= window_start then
+                cons_rate = cons_rate + (n / TICKS_PER_MINUTE)
+            end
+        end
+
+        local cons_max = 0
+        for _, cons in ipairs(item.consumers) do
+            cons_max = cons_max + (TICKS_PER_SECOND / cons.ticks * cons.amount)
+        end
+
+        stats[item_id] = {
+            item_def = item.item_def,
+
+            window_start = window_start,
+
+            producers = #item.producers,
+            production = prod_rate,
+            production_max = prod_max,
+
+            consumers = #item.consumers,
+            consumption = cons_rate,
+            consumption_max = cons_max,
+        }
     end
     return stats
 end

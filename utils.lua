@@ -8,7 +8,9 @@ end
 local suffixes = {"k", "M", "G"}
 
 function numformat(value, precision)
-    if value == nil then return nil end
+    if value == nil then
+        return nil
+    end
 
     if precision == nil then
         return tostring(value)
