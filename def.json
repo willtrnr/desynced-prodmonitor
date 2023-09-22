@@ -10,7 +10,7 @@
         "UI": {
             "name": "UI",
             "type": "Addon",
-            "entry": "ui.lua",
+            "entry": "src/ui.lua",
             "dependencies": [
                 "Main/Data",
                 "Main/UI"
