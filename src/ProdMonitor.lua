@@ -6,7 +6,7 @@ local ProdMonitor_layout<const> = [[
                     id=btn_open
                     width=32
                     height=32
-                    icon=icon50_Faction
+                    icon="ProdMonitor/skin/icon.png"
                     on_click={on_open_click}
                 />
             </VerticalList>

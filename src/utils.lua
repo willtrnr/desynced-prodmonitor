@@ -1,3 +1,23 @@
+local socket_sizes = {
+    Internal = 1,
+    Small = 2,
+    Medium = 3,
+    Large = 4,
+}
+
+function compare_socket_size(socket_a, socket_b)
+    local a, b = socket_sizes[socket_a], socket_sizes[socket_b]
+
+    if a > b then
+        return 1
+    end
+    if a < b then
+        return -1
+    end
+
+    return 0
+end
+
 function make_item_filter(search)
     local search = string.lower(search or "")
     return function(item_def)
@@ -39,24 +59,4 @@ function numformat(value, precision)
             return string.format("%d.%d%s", i, m, suffix)
         end
     end
-end
-
-local socket_sizes = {
-    Internal = 1,
-    Small = 2,
-    Medium = 3,
-    Large = 4,
-}
-
-function compare_socket_size(socket_a, socket_b)
-    local a, b = socket_sizes[socket_a], socket_sizes[socket_b]
-
-    if a > b then
-        return 1
-    end
-    if a < b then
-        return -1
-    end
-
-    return 0
 end
