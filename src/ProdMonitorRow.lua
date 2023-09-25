@@ -1,3 +1,21 @@
+local ProdMonitorCell_layout<const> = [[
+    <VerticalList width={width} height={height} child_align={child_align}>
+        <Text text={label} size=8 color=light_gray />
+        <HorizontalList child_align=bottom>
+            <Text text={value_str} size=14 color={value_color} />
+            <Text text={unit} size=8 margin=2 color=light_gray />
+        </HorizontalList>
+    </VerticalList>
+]]
+
+local ProdMonitorCell<const> = {}
+UI.Register("ProdMonitorCell", ProdMonitorCell_layout, ProdMonitorCell)
+
+function ProdMonitorCell:construct()
+    self.value_str = numformat(self.value, self.precision)
+    self.value_color = self.value_color
+end
+
 local ProdMonitorRow_layout<const> = [[
     <Box bg=popup_additional_bg padding=8>
         <HorizontalList child_align=center>
@@ -34,6 +52,14 @@ local ProdMonitorRow_layout<const> = [[
                         child_align=right
                         width=110
                     />
+                    <ProdMonitorCell
+                        id=carried_cell
+                        label="In transit"
+                        value={carried}
+                        value_color=ui_light
+                        child_align=right
+                        width=80
+                    />
                 </HorizontalList>
                 <Image height=1 color=dark_gray />
                 <HorizontalList>
@@ -64,6 +90,14 @@ local ProdMonitorRow_layout<const> = [[
                         child_align=right
                         width=110
                     />
+                    <ProdMonitorCell
+                        id=ordered_cell
+                        label="Ordered"
+                        value={ordered}
+                        value_color=ui_light
+                        child_align=right
+                        width=80
+                    />
                 </HorizontalList>
             </VerticalList>
         </HorizontalList>
@@ -75,7 +109,7 @@ UI.Register("ProdMonitorRow", ProdMonitorRow_layout, ProdMonitorRow)
 
 function ProdMonitorRow:construct()
     if not self.item_def then
-        self.item_def = data.all[self.item_id]
+        self.item_def = data.items[self.item_id]
     else
         self.item_id = self.item_def.id
     end
@@ -85,34 +119,20 @@ function ProdMonitorRow:construct()
         self.item_name = self.item_def.name
     end
 
-    if self.consumption >= self.production_max then
+    if self.consumption > self.production_max then
         self.cons_cell.value_color = "red"
         self.prod_max_cell.value_color = "red"
     end
 
-    if self.consumption_max >= self.production_max then
+    if self.consumption_max > self.production_max then
         self.cons_max_cell.value_color = "yellow"
+    end
+
+    if self.ordered > self.carried then
+        self.ordered_cell.value_color = "yellow"
     end
 end
 
 function ProdMonitorRow:on_item_click()
    OpenMainWindow("Faction", { show_item_id = self.item_id })
-end
-
-local ProdMonitorCell_layout<const> = [[
-    <VerticalList width={width} height={height} child_align={child_align}>
-        <Text text={label} size=8 color=light_gray />
-        <HorizontalList child_align=bottom>
-            <Text text={value_str} size=14 color={value_color} />
-            <Text text={unit} size=8 margin=2 color=light_gray />
-        </HorizontalList>
-    </VerticalList>
-]]
-
-local ProdMonitorCell<const> = {}
-UI.Register("ProdMonitorCell", ProdMonitorCell_layout, ProdMonitorCell)
-
-function ProdMonitorCell:construct()
-    self.value_str = numformat(self.value, self.precision)
-    self.value_color = self.value_color
 end

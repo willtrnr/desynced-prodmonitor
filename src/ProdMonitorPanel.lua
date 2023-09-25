@@ -1,4 +1,4 @@
-local item_tags<const> = {
+local ITEM_TAGS<const> = {
     "resource",
     "simple_material",
     "advanced_material",
@@ -8,11 +8,16 @@ local item_tags<const> = {
     "other",
 }
 
+local VIEW_ITEMS<const> = 1
+
 local ProdMonitorPanel_layout<const> = [[
-    <Box bg=popup_pattern padding=4 width=435 min_height=600 max_height=600>
+    <Box bg=popup_pattern padding=4 width=515 min_height=600 max_height=600>
         <VerticalList child_padding=4>
             <TextSearch on_refresh={update} />
-            <ScrollList id=item_list fill=true child_padding=3 />
+            <HorizontalList child_fill=true child_padding=4 hidden=true>
+                <Button id=btn_view_items text="Items" on_click={select_items_view} />
+            </HorizontalList>
+            <ScrollList id=content fill=true child_padding=4 />
         </VerticalList>
     </Box>
 ]]
@@ -21,12 +26,8 @@ local ProdMonitorPanel<const> = {}
 UI.Register("ProdMonitorPanel", ProdMonitorPanel_layout, ProdMonitorPanel)
 
 function ProdMonitorPanel:construct()
-    self.tag_lists = {}
-    for _, tag in ipairs(item_tags) do
-        self.tag_lists[tag] = self.item_list:Add("VerticalList", { child_padding = 3 })
-    end
-
-    self:refresh()
+    self:select_items_view()
+    self:render()
 end
 
 function ProdMonitorPanel:update(_view, search)
@@ -36,27 +37,43 @@ function ProdMonitorPanel:update(_view, search)
 
     -- Refresh only once per second or when search changed
     if search or Map.GetTick() % TICKS_PER_SECOND == 0 then
-        self:refresh()
+        self:render()
     end
 end
 
-function ProdMonitorPanel:refresh()
+function ProdMonitorPanel:select_items_view()
+    self.selected_view = VIEW_ITEMS
+    self.btn_view_items.active = true
+end
+
+function ProdMonitorPanel:render()
+    if self.selected_view == VIEW_ITEMS then
+        self:render_item_stats()
+    else
+        unreachable()
+    end
+end
+
+function ProdMonitorPanel:render_item_stats()
     local stats = get_item_stats(Game.GetLocalPlayerFaction())
 
-    local item_filter = make_item_filter(self.search)
+    self.content:Clear()
 
-    for _, tag in ipairs(item_tags) do
-        self.tag_lists[tag]:Clear()
+    local tags = {}
+    for _, tag in ipairs(ITEM_TAGS) do
+        tags[tag] = self.content:Add("VerticalList", { child_padding = 4 })
     end
 
     local get_list = function(item_def)
-        return (item_def and item_def.tag and self.tag_lists[item_def.tag]) or self.tag_lists["other"]
+        return (item_def and item_def.tag and tags[item_def.tag]) or tags["other"]
     end
 
-    for _, item_stats in pairs(stats) do
+    local filter_pred = make_item_filter(self.search)
+
+    for item_id, item_stats in pairs(stats) do
         local list = get_list(item_stats.item_def)
-        if list and item_filter(item_stats.item_def) then
-            -- TODO Add toggle for per-second instead of per-minute... maybe
+        if list and filter_pred(item_stats.item_def) then
+            -- TODO Add toggle for per-second instead of per-minute... maybe?
             list:Add("ProdMonitorRow", {
                 item_def = item_stats.item_def,
 
@@ -67,6 +84,9 @@ function ProdMonitorPanel:refresh()
                 consumers = item_stats.consumers,
                 consumption = item_stats.consumption * 60,
                 consumption_max = item_stats.consumption_max * 60,
+
+                ordered = item_stats.ordered,
+                carried = item_stats.carried,
             })
         end
     end

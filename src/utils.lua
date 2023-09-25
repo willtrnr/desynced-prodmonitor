@@ -1,4 +1,15 @@
-local socket_sizes = {
+function unreachable()
+    Debug.Assert(false, "unreachable")
+end
+
+function make_item_filter(search)
+    local search = string.lower(search or "")
+    return function(item_def)
+        return not search or (item_def and string.find(string.lower(L(item_def.name or "")), search))
+    end
+end
+
+local SOCKET_SIZES<const> = {
     Internal = 1,
     Small = 2,
     Medium = 3,
@@ -6,7 +17,7 @@ local socket_sizes = {
 }
 
 function compare_socket_size(socket_a, socket_b)
-    local a, b = socket_sizes[socket_a], socket_sizes[socket_b]
+    local a, b = SOCKET_SIZES[socket_a], SOCKET_SIZES[socket_b]
 
     if a > b then
         return 1
@@ -18,14 +29,7 @@ function compare_socket_size(socket_a, socket_b)
     return 0
 end
 
-function make_item_filter(search)
-    local search = string.lower(search or "")
-    return function(item_def)
-        return not search or (item_def and string.find(string.lower(L(item_def.name or "")), search))
-    end
-end
-
-local suffixes = {"k", "M", "G"}
+local SUFFIXES<const> = {"k", "M", "G"}
 
 function numformat(value, precision)
     if value == nil then
@@ -36,7 +40,7 @@ function numformat(value, precision)
         return tostring(value)
     else
         local suffix = ""
-        for _, s in ipairs(suffixes) do
+        for _, s in ipairs(SUFFIXES) do
             if value >= 1000 then
                 suffix = s
                 value = value / 1000
@@ -59,4 +63,16 @@ function numformat(value, precision)
             return string.format("%d.%d%s", i, m, suffix)
         end
     end
+end
+
+function fold(data, fn, zero)
+    local res = zero
+    for _, item in ipairs(data) do
+        res = fn(res, item)
+    end
+    return res
+end
+
+function sumby(data, fn)
+    return fold(data, function(a, b) return a + fn(b) end, 0)
 end

@@ -30,6 +30,7 @@ function get_logistic_data(faction)
                 item_def = item_def,
                 producers = {},
                 consumers = {},
+                orders = {},
             }
             res[item_id] = item
         end
@@ -124,6 +125,13 @@ function get_logistic_data(faction)
         add_component_stats(comp)
     end
 
+    for _, order in ipairs(faction:GetActiveOrders()) do
+        local item = get_item(order.item_id)
+        if item then
+            table.insert(item.orders, order)
+        end
+    end
+
     return res
 end
 
@@ -172,10 +180,12 @@ function get_item_stats(faction)
             window_start
         )
 
-        local prod_max = 0
-        for _, prod in ipairs(item.producers) do
-            prod_max = prod_max + (TICKS_PER_SECOND / prod.ticks * prod.amount)
-        end
+        local prod_max = sumby(
+            item.producers,
+            function(prod)
+                return TICKS_PER_SECOND / prod.ticks * prod.amount
+            end
+        )
 
         local cons_rate = calc_history_rate(
             history.total_removed,
@@ -184,9 +194,19 @@ function get_item_stats(faction)
             window_start
         )
 
-        local cons_max = 0
-        for _, cons in ipairs(item.consumers) do
-            cons_max = cons_max + (TICKS_PER_SECOND / cons.ticks * cons.amount)
+        local cons_max = sumby(
+            item.consumers,
+            function(cons)
+                return TICKS_PER_SECOND / cons.ticks * cons.amount
+            end
+        )
+
+        local ordered, carried = 0, 0
+        for _, order in ipairs(item.orders) do
+            ordered = ordered + order.amount
+            if order.carry_entity then
+                carried = carried + order.amount
+            end
         end
 
         stats[item_id] = {
@@ -201,6 +221,9 @@ function get_item_stats(faction)
             consumers = #item.consumers,
             consumption = cons_rate,
             consumption_max = cons_max,
+
+            ordered = ordered,
+            carried = carried,
         }
     end
     return stats

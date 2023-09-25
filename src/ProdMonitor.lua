@@ -1,6 +1,6 @@
 local ProdMonitor_layout<const> = [[
     <Canvas>
-        <Box padding=4 x=4 y=80 dock=top-left>
+        <Box padding=4 x=4 y=100 dock=top-left>
             <VerticalList child_padding=4>
                 <Button
                     id=btn_open
