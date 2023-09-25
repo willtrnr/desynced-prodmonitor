@@ -172,8 +172,6 @@ function get_item_stats(faction)
             window_start
         )
 
-        print(prod_rate)
-
         local prod_max = 0
         for _, prod in ipairs(item.producers) do
             prod_max = prod_max + (TICKS_PER_SECOND / prod.ticks * prod.amount)
