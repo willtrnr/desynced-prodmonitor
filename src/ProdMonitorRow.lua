@@ -21,7 +21,7 @@ local ProdMonitorRow_layout<const> = [[
         <HorizontalList child_align=center>
             <VerticalList child_align=center margin_right=6 fill=true on_click={on_item_click}>
                 <Image image={item_icon} width=38 height=38 />
-                <Text text={item_name} size=8 />
+                <Text text={item_name} textalign=center wrap=true size=8 />
             </VerticalList>
             <VerticalList child_padding=6 padding=4>
                 <HorizontalList>

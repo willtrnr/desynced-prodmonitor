@@ -11,7 +11,7 @@ local ITEM_TAGS<const> = {
 local VIEW_ITEMS<const> = 1
 
 local ProdMonitorPanel_layout<const> = [[
-    <Box bg=popup_pattern padding=4 width=515 min_height=600 max_height=600>
+    <Box bg=popup_pattern padding=4 width=510 min_height=600 max_height=600>
         <VerticalList child_padding=4>
             <TextSearch on_refresh={update} />
             <HorizontalList child_fill=true child_padding=4 hidden=true>
@@ -27,7 +27,6 @@ UI.Register("ProdMonitorPanel", ProdMonitorPanel_layout, ProdMonitorPanel)
 
 function ProdMonitorPanel:construct()
     self:select_items_view()
-    self:render()
 end
 
 function ProdMonitorPanel:update(_view, search)
@@ -55,7 +54,7 @@ function ProdMonitorPanel:render()
 end
 
 function ProdMonitorPanel:render_item_stats()
-    local stats = get_item_stats(Game.GetLocalPlayerFaction())
+    local stats = get_item_stats(Game.GetLocalPlayerFaction(), true)
 
     self.content:Clear()
 

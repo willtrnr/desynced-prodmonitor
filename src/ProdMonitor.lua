@@ -3,11 +3,19 @@ local ProdMonitor_layout<const> = [[
         <Box padding=4 x=4 y=100 dock=top-left>
             <VerticalList child_padding=4>
                 <Button
-                    id=btn_open
+                    id=btn_open_panel
                     width=32
                     height=32
-                    icon="ProdMonitor/skin/icon.png"
+                    icon="ProdMonitor/skin/Icons/50x50/ProdMonitor.png"
                     on_click={on_open_click}
+                />
+                <Button
+                    id=btn_open_graph
+                    width=32
+                    height=32
+                    icon="Main/skin/Icons/Common/50x50/Technology Tree.png"
+                    on_click={on_open_click}
+                    hidden=true
                 />
             </VerticalList>
         </Box>
@@ -18,39 +26,56 @@ local ProdMonitor<const> = {}
 UI.Register("ProdMonitor", ProdMonitor_layout, ProdMonitor)
 
 function ProdMonitor:construct()
-    self.btn_open.tooltip = L("<header>%S</>", "Production Monitor")
+    self.btn_open_panel.tooltip = L("<header>%S</>", "Production Monitor")
+    self.btn_open_graph.tooltip = L("<header>%S</>", "Production Graph")
     self.prodmonitor_window = nil
 end
 
-function ProdMonitor:on_open_click()
+function ProdMonitor:on_open_click(btn)
     local parent = self
+    local btn = btn
 
-    UI.MenuPopup(
-        [[
+    local layout
+    if btn == self.btn_open_panel then
+        layout = [[
             <Canvas>
                 <Box bg=popup_box_bg padding=4 blur=true>
                     <ProdMonitorPanel />
                 </Box>
             </Canvas>
-        ]],
+        ]]
+    elseif btn == self.btn_open_graph then
+        layout = [[
+            <Canvas>
+                <Box bg=popup_box_bg padding=4 blur=true>
+                    <ProdMonitorGraph />
+                </Box>
+            </Canvas>
+        ]]
+    else
+        unreachable()
+    end
+
+    UI.MenuPopup(
+        layout,
         {
             construct = function()
                 if parent then
                     parent.prodmonitor_window = self
-                    if parent.btn_open:IsValid() then
-                        parent.btn_open.active = true
+                    if btn:IsValid() then
+                        btn.active = true
                     end
                 end
             end,
             destruct = function()
                 if parent then
                     parent.prodmonitor_window = nil
-                    if parent.btn_open:IsValid() then
-                        parent.btn_open.active = false
+                    if btn:IsValid() then
+                        btn.active = false
                     end
                 end
             end
         },
-        self.btn_open, "RIGHT", "TOP", 8, -4
+        btn, "RIGHT", "TOP", 8, -4
     )
 end

@@ -1,5 +1,5 @@
 function unreachable()
-    Debug.Assert(false, "unreachable")
+    error("unreachable")
 end
 
 function make_item_filter(search)

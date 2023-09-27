@@ -2,6 +2,7 @@ local package = ...
 
 package.includes = {
     "ProdMonitor.lua",
+    "ProdMonitorGraph.lua",
     "ProdMonitorPanel.lua",
     "ProdMonitorRow.lua",
     "stats.lua",

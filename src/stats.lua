@@ -1,4 +1,4 @@
-function get_total_speed_factor(comp)
+local function get_total_speed_factor(comp)
     local owner = comp.owner
     if not owner then return 1 end
 
@@ -16,7 +16,7 @@ function get_total_speed_factor(comp)
     return 100 / total_boost
 end
 
-function get_logistic_data(faction)
+function get_logistic_graph(faction, with_orders)
     local res = {}
 
     local get_item = function(item_id)
@@ -37,7 +37,7 @@ function get_logistic_data(faction)
         return item
     end
 
-    local add_component_stats = function(comp)
+    local add_component = function(comp)
         local comp_def = comp.def
         if not comp_def then return end
 
@@ -93,12 +93,13 @@ function get_logistic_data(faction)
                         ticks = ticks,
                     })
 
-                    for item_id, amount in pairs(item.item_def.production_recipe.ingredients) do
-                        local item = get_item(item_id)
-                        if item then
-                            table.insert(item.consumers, {
+                    for ing_id, amount in pairs(item.item_def.production_recipe.ingredients) do
+                        local ing = get_item(ing_id)
+                        if ing then
+                            table.insert(ing.consumers, {
                                 component = comp,
                                 amount = amount,
+                                product = item.item_def,
                                 ticks = ticks,
                             })
                         end
@@ -122,13 +123,15 @@ function get_logistic_data(faction)
     end
 
     for _, comp in ipairs(faction:GetComponents()) do
-        add_component_stats(comp)
+        add_component(comp)
     end
 
-    for _, order in ipairs(faction:GetActiveOrders()) do
-        local item = get_item(order.item_id)
-        if item then
-            table.insert(item.orders, order)
+    if with_orders then
+        for _, order in ipairs(faction:GetActiveOrders()) do
+            local item = get_item(order.item_id)
+            if item then
+                table.insert(item.orders, order)
+            end
         end
     end
 
@@ -136,7 +139,7 @@ function get_logistic_data(faction)
 end
 
 -- Calculate item history increase rate per second
-function calc_history_rate(data, start, step, window_start)
+local function calc_history_rate(data, start, step, window_start)
     local ax, ay, bx, by = nil, 0, nil, 0
     for x, y in ipairs(data) do
         local t = start + (x - 1) * step
@@ -163,13 +166,13 @@ end
 local WINDOW_LENGTH_SECS<const> = 60
 local WINDOW_LENGTH_TICKS<const> = WINDOW_LENGTH_SECS * TICKS_PER_SECOND
 
-function get_item_stats(faction)
+function get_item_stats(faction, with_orders)
     local window_start = Map.GetTick() - WINDOW_LENGTH_TICKS
 
-    local logistics = get_logistic_data(faction)
+    local graph = get_logistic_graph(faction, with_orders)
 
     local stats = {}
-    for item_id, item in pairs(logistics) do
+    for item_id, item in pairs(graph) do
         local history = faction:GetItemHistory(item_id, 1, WINDOW_LENGTH_TICKS)
         local history_start = history.tick - WINDOW_LENGTH_TICKS
 

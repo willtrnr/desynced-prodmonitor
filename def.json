@@ -5,14 +5,13 @@
     "version_code": 1010,
     "author": "Moekumo",
     "homepage": "https://github.com/willtrnr/desynced-prodmonitor",
-    "description": "Provides additional production and consumption satisfaction metrics.",
+    "description": "Provides additional production and logistric metrics.",
     "packages": {
         "UI": {
             "name": "UI",
             "type": "Addon",
             "entry": "src/ui.lua",
             "dependencies": [
-                "Main/Data",
                 "Main/UI"
             ]
         }
