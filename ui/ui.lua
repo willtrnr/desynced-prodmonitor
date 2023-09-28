@@ -6,7 +6,7 @@ package.includes = {
     "ProdMonitorSideBar.lua",
 }
 
-package.data = Game.GetModPackage("ProdMonitor/Data")
+package.data = Game.GetModPackage(package.mod_id .. "/Data")
 
 function package:init_ui()
 end

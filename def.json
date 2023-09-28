@@ -18,7 +18,7 @@
         "UI": {
             "name": "UI",
             "type": "Addon",
-            "entry": "src/ui.lua",
+            "entry": "ui/ui.lua",
             "dependencies": [
                 "ProdMonitor/Data",
                 "Main/UI"
