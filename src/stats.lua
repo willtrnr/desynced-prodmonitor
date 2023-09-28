@@ -1,6 +1,13 @@
+local utils = ProdMonitor.utils
+
+local WINDOW_LENGTH_SECS<const> = 60
+local WINDOW_LENGTH_TICKS<const> = WINDOW_LENGTH_SECS * TICKS_PER_SECOND
+
 local function get_total_speed_factor(comp)
     local owner = comp.owner
-    if not owner then return 1 end
+    if not owner then
+        return 1
+    end
 
     -- Set by efficiency modules
     local total_boost = owner.component_boost or 100
@@ -8,7 +15,7 @@ local function get_total_speed_factor(comp)
     if comp.socket_index and comp.def and comp.def.attachment_size and owner.visual_def then
         -- Components installed in larger sockets than they need get a 50% boost
         local comp_socket = owner.visual_def.sockets and owner.visual_def.sockets[comp.socket_index]
-        if comp_socket and compare_socket_size(comp.def.attachment_size, comp_socket[2]) < 0 then
+        if comp_socket and utils.compare_socket_size(comp.def.attachment_size, comp_socket[2]) < 0 then
             total_boost = total_boost + 50
         end
     end
@@ -16,7 +23,30 @@ local function get_total_speed_factor(comp)
     return 100 / total_boost
 end
 
-function get_logistic_graph(faction, with_orders)
+-- Calculate item history increase rate per second
+local function calc_history_rate(data, start, step, window_start)
+    local ax, ay, bx, by = nil, 0, nil, 0
+    for x, y in ipairs(data) do
+        local t = start + (x - 1) * step
+        if t >= window_start and y > 0 then
+            if ax == nil then
+                -- Keep the first non-zero data point
+                ax, ay = t, y
+            end
+            -- Rolling sum for ending point
+            bx, by = t, by + y
+        end
+    end
+
+    if ax == bx then
+        -- No data or only one point
+        return 0
+    else
+        return (by - ay) / (bx - ax) * TICKS_PER_SECOND
+    end
+end
+
+local function get_logistic_graph(faction, with_orders)
     local res = {}
 
     local get_item = function(item_id)
@@ -39,14 +69,18 @@ function get_logistic_graph(faction, with_orders)
 
     local add_component = function(comp)
         local comp_def = comp.def
-        if not comp_def then return end
+        if not comp_def then
+            return
+        end
 
         local speed_factor = get_total_speed_factor(comp)
 
         local reg_def = comp_def.registers and comp_def.registers[1]
         if reg_def then
             local reg = comp:GetRegister(1)
-            if not reg or reg.is_empty then return end
+            if not reg or reg.is_empty then
+                return
+            end
 
             if comp_def.id == "c_uplink" then
                 -- Special case for Uplink component, there's no special register type for
@@ -67,14 +101,18 @@ function get_logistic_graph(faction, with_orders)
             elseif reg.item_id or reg.raw_entity then
                 -- Regular item production
                 local item = get_item(reg.item_id or GetResourceHarvestItemId(reg.raw_entity))
-                if not item then return end
+                if not item then
+                    return
+                end
 
                 -- WARN: It's possible to set an invalid recipe through signals and links,
                 -- coherence must be double checked
 
                 if reg_def.type == "miner" and item.item_def.mining_recipe then
                     local ticks = item.item_def.mining_recipe[comp.id]
-                    if ticks == nil then return end
+                    if ticks == nil then
+                        return
+                    end
 
                     table.insert(item.producers, {
                         component = comp,
@@ -83,7 +121,9 @@ function get_logistic_graph(faction, with_orders)
                     })
                 elseif reg_def.type == "production" and item.item_def.production_recipe then
                     local ticks = item.item_def.production_recipe.producers[comp.id]
-                    if ticks == nil then return end
+                    if ticks == nil then
+                        return
+                    end
 
                     ticks = math.ceil(ticks * speed_factor)
 
@@ -109,10 +149,14 @@ function get_logistic_graph(faction, with_orders)
         elseif comp_def.extracts then
             -- "Passive" extractors don't use registers for production
             local item = get_item(comp_def.extracts)
-            if not item then return end
+            if not item then
+                return
+            end
 
             local ticks = comp_def.extraction_time
-            if ticks == nil then return end
+            if ticks == nil then
+                return
+            end
 
             table.insert(item.producers, {
                 component = comp,
@@ -138,35 +182,7 @@ function get_logistic_graph(faction, with_orders)
     return res
 end
 
--- Calculate item history increase rate per second
-local function calc_history_rate(data, start, step, window_start)
-    local ax, ay, bx, by = nil, 0, nil, 0
-    for x, y in ipairs(data) do
-        local t = start + (x - 1) * step
-        if t >= window_start and y > 0 then
-            if ax == nil then
-                -- Keep the first non-zero data point
-                ax = t
-                ay = y
-            end
-            -- Rolling sum for ending point
-            bx = t
-            by = by + y
-        end
-    end
-
-    if ax == bx then
-        -- No data or only one point
-        return 0
-    else
-        return (by - ay) / (bx - ax) * TICKS_PER_SECOND
-    end
-end
-
-local WINDOW_LENGTH_SECS<const> = 60
-local WINDOW_LENGTH_TICKS<const> = WINDOW_LENGTH_SECS * TICKS_PER_SECOND
-
-function get_item_stats(faction, with_orders)
+local function get_item_stats(faction, with_orders)
     local window_start = Map.GetTick() - WINDOW_LENGTH_TICKS
 
     local graph = get_logistic_graph(faction, with_orders)
@@ -183,7 +199,7 @@ function get_item_stats(faction, with_orders)
             window_start
         )
 
-        local prod_max = sumby(
+        local prod_max = utils.sumby(
             item.producers,
             function(prod)
                 return TICKS_PER_SECOND / prod.ticks * prod.amount
@@ -197,7 +213,7 @@ function get_item_stats(faction, with_orders)
             window_start
         )
 
-        local cons_max = sumby(
+        local cons_max = utils.sumby(
             item.consumers,
             function(cons)
                 return TICKS_PER_SECOND / cons.ticks * cons.amount
@@ -231,3 +247,8 @@ function get_item_stats(faction, with_orders)
     end
     return stats
 end
+
+ProdMonitor.stats = {
+    get_logistic_graph = get_logistic_graph,
+    get_item_stats = get_item_stats,
+}

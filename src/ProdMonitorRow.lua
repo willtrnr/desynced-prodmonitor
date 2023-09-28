@@ -1,3 +1,5 @@
+local utils = ProdMonitor.utils
+
 local ProdMonitorCell_layout<const> = [[
     <VerticalList width={width} height={height} child_align={child_align}>
         <Text text={label} size=8 color=light_gray />
@@ -12,7 +14,7 @@ local ProdMonitorCell<const> = {}
 UI.Register("ProdMonitorCell", ProdMonitorCell_layout, ProdMonitorCell)
 
 function ProdMonitorCell:construct()
-    self.value_str = numformat(self.value, self.precision)
+    self.value_str = utils.numformat(self.value, self.precision)
     self.value_color = self.value_color
 end
 

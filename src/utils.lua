@@ -1,8 +1,8 @@
-function unreachable()
+local function unreachable()
     error("unreachable")
 end
 
-function make_item_filter(search)
+local function make_item_filter(search)
     local search = string.lower(search or "")
     return function(item_def)
         return not search or (item_def and string.find(string.lower(L(item_def.name or "")), search))
@@ -16,7 +16,7 @@ local SOCKET_SIZES<const> = {
     Large = 4,
 }
 
-function compare_socket_size(socket_a, socket_b)
+local function compare_socket_size(socket_a, socket_b)
     local a, b = SOCKET_SIZES[socket_a], SOCKET_SIZES[socket_b]
 
     if a > b then
@@ -31,7 +31,7 @@ end
 
 local SUFFIXES<const> = {"k", "M", "G"}
 
-function numformat(value, precision)
+local function numformat(value, precision)
     if value == nil then
         return nil
     end
@@ -55,7 +55,9 @@ function numformat(value, precision)
         local m = math.floor(((value % 1) * p) + 0.5)
 
         -- float precision error compensation
-        if m >= p then m = m - p end
+        if m >= p then
+            m = m - p
+        end
 
         if m == 0 then
             return string.format("%d%s", i, suffix)
@@ -65,7 +67,7 @@ function numformat(value, precision)
     end
 end
 
-function fold(data, fn, zero)
+local function fold(data, fn, zero)
     local res = zero
     for _, item in ipairs(data) do
         res = fn(res, item)
@@ -73,6 +75,21 @@ function fold(data, fn, zero)
     return res
 end
 
-function sumby(data, fn)
-    return fold(data, function(a, b) return a + fn(b) end, 0)
+local function sumby(data, fn)
+    return fold(
+        data,
+        function(a, b)
+            return a + fn(b)
+        end,
+        0
+    )
 end
+
+ProdMonitor.utils = {
+    unreachable = unreachable,
+    make_item_filter = make_item_filter,
+    compare_socket_size = compare_socket_size,
+    numformat = numformat,
+    fold = fold,
+    sumby = sumby,
+}

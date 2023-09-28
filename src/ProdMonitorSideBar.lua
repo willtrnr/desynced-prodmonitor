@@ -1,4 +1,6 @@
-local ProdMonitor_layout<const> = [[
+local utils = ProdMonitor.utils
+
+local ProdMonitorSideBar_layout<const> = [[
     <Canvas>
         <Box padding=4 x=4 y=100 dock=top-left>
             <VerticalList child_padding=4>
@@ -9,29 +11,20 @@ local ProdMonitor_layout<const> = [[
                     icon="ProdMonitor/skin/Icons/50x50/ProdMonitor.png"
                     on_click={on_open_click}
                 />
-                <Button
-                    id=btn_open_graph
-                    width=32
-                    height=32
-                    icon="Main/skin/Icons/Common/50x50/Technology Tree.png"
-                    on_click={on_open_click}
-                    hidden=true
-                />
             </VerticalList>
         </Box>
     </Canvas>
 ]]
 
-local ProdMonitor<const> = {}
-UI.Register("ProdMonitor", ProdMonitor_layout, ProdMonitor)
+local ProdMonitorSideBar<const> = {}
+UI.Register("ProdMonitorSideBar", ProdMonitorSideBar_layout, ProdMonitorSideBar)
 
-function ProdMonitor:construct()
+function ProdMonitorSideBar:construct()
     self.btn_open_panel.tooltip = L("<header>%S</>", "Production Monitor")
-    self.btn_open_graph.tooltip = L("<header>%S</>", "Production Graph")
     self.prodmonitor_window = nil
 end
 
-function ProdMonitor:on_open_click(btn)
+function ProdMonitorSideBar:on_open_click(btn)
     local parent = self
     local btn = btn
 
@@ -44,16 +37,8 @@ function ProdMonitor:on_open_click(btn)
                 </Box>
             </Canvas>
         ]]
-    elseif btn == self.btn_open_graph then
-        layout = [[
-            <Canvas>
-                <Box bg=popup_box_bg padding=4 blur=true>
-                    <ProdMonitorGraph />
-                </Box>
-            </Canvas>
-        ]]
     else
-        unreachable()
+        utils.unreachable()
     end
 
     UI.MenuPopup(

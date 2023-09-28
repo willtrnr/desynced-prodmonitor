@@ -1,3 +1,6 @@
+local stats = ProdMonitor.stats
+local utils = ProdMonitor.utils
+
 local ITEM_TAGS<const> = {
     "resource",
     "simple_material",
@@ -54,7 +57,7 @@ function ProdMonitorPanel:render()
 end
 
 function ProdMonitorPanel:render_item_stats()
-    local stats = get_item_stats(Game.GetLocalPlayerFaction(), true)
+    local data = stats.get_item_stats(Game.GetLocalPlayerFaction(), true)
 
     self.content:Clear()
 
@@ -67,9 +70,9 @@ function ProdMonitorPanel:render_item_stats()
         return (item_def and item_def.tag and tags[item_def.tag]) or tags["other"]
     end
 
-    local filter_pred = make_item_filter(self.search)
+    local filter_pred = utils.make_item_filter(self.search)
 
-    for item_id, item_stats in pairs(stats) do
+    for item_id, item_stats in pairs(data) do
         local list = get_list(item_stats.item_def)
         if list and filter_pred(item_stats.item_def) then
             -- TODO Add toggle for per-second instead of per-minute... maybe?

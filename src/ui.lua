@@ -1,17 +1,18 @@
 local package = ...
 
+ProdMonitor = package
+
 package.includes = {
-    "ProdMonitor.lua",
-    "ProdMonitorGraph.lua",
+    "utils.lua",
+    "stats.lua",
     "ProdMonitorPanel.lua",
     "ProdMonitorRow.lua",
-    "stats.lua",
-    "utils.lua",
+    "ProdMonitorSideBar.lua",
 }
 
-function UIMsg.OnSetup()
-    UI.AddLayout("ProdMonitor")
+function package:init_ui()
 end
 
-function package:init_ui()
+function UIMsg.OnSetup()
+    UI.AddLayout("ProdMonitorSideBar")
 end
