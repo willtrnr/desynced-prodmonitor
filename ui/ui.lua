@@ -1,14 +1,12 @@
 local package = ...
 
-ProdMonitor = package
-
 package.includes = {
-    "utils.lua",
-    "stats.lua",
     "ProdMonitorPanel.lua",
     "ProdMonitorRow.lua",
     "ProdMonitorSideBar.lua",
 }
+
+package.data = Game.GetModPackage("ProdMonitor/Data")
 
 function package:init_ui()
 end

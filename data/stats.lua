@@ -1,4 +1,6 @@
-local utils = ProdMonitor.utils
+local package = ...
+
+local utils = package.utils
 
 local WINDOW_LENGTH_SECS<const> = 60
 local WINDOW_LENGTH_TICKS<const> = WINDOW_LENGTH_SECS * TICKS_PER_SECOND
@@ -86,15 +88,17 @@ local function get_logistic_graph(faction, with_orders)
                 -- Special case for Uplink component, there's no special register type for
                 -- research apparently.
                 local tech_def = data.techs[reg.tech_id]
-                if tech_def  then
+                if tech_def then
                     for item_id, amount in pairs(tech_def.uplink_recipe.ingredients) do
                         local item = get_item(item_id)
                         if item then
-                            table.insert(item.consumers, {
-                                component = comp,
-                                amount = amount,
-                                ticks = math.ceil(tech_def.uplink_recipe.ticks * speed_factor),
-                            })
+                            table.insert(
+                                item.consumers, {
+                                    component = comp,
+                                    amount = amount,
+                                    ticks = math.ceil(tech_def.uplink_recipe.ticks * speed_factor),
+                                }
+                            )
                         end
                     end
                 end
@@ -114,11 +118,13 @@ local function get_logistic_graph(faction, with_orders)
                         return
                     end
 
-                    table.insert(item.producers, {
-                        component = comp,
-                        amount = 1,
-                        ticks = math.ceil(ticks * speed_factor),
-                    })
+                    table.insert(
+                        item.producers, {
+                            component = comp,
+                            amount = 1,
+                            ticks = math.ceil(ticks * speed_factor),
+                        }
+                    )
                 elseif reg_def.type == "production" and item.item_def.production_recipe then
                     local ticks = item.item_def.production_recipe.producers[comp.id]
                     if ticks == nil then
@@ -127,21 +133,25 @@ local function get_logistic_graph(faction, with_orders)
 
                     ticks = math.ceil(ticks * speed_factor)
 
-                    table.insert(item.producers, {
-                        component = comp,
-                        amount = item.item_def.production_recipe.amount,
-                        ticks = ticks,
-                    })
+                    table.insert(
+                        item.producers, {
+                            component = comp,
+                            amount = item.item_def.production_recipe.amount,
+                            ticks = ticks,
+                        }
+                    )
 
                     for ing_id, amount in pairs(item.item_def.production_recipe.ingredients) do
                         local ing = get_item(ing_id)
                         if ing then
-                            table.insert(ing.consumers, {
-                                component = comp,
-                                amount = amount,
-                                product = item.item_def,
-                                ticks = ticks,
-                            })
+                            table.insert(
+                                ing.consumers, {
+                                    component = comp,
+                                    amount = amount,
+                                    product = item.item_def,
+                                    ticks = ticks,
+                                }
+                            )
                         end
                     end
                 end
@@ -158,11 +168,13 @@ local function get_logistic_graph(faction, with_orders)
                 return
             end
 
-            table.insert(item.producers, {
-                component = comp,
-                amount = 1,
-                ticks = math.ceil(ticks * speed_factor),
-            })
+            table.insert(
+                item.producers, {
+                    component = comp,
+                    amount = 1,
+                    ticks = math.ceil(ticks * speed_factor),
+                }
+            )
         end
     end
 
@@ -193,29 +205,21 @@ local function get_item_stats(faction, with_orders)
         local history_start = history.tick - WINDOW_LENGTH_TICKS
 
         local prod_rate = calc_history_rate(
-            history.total_added,
-            history_start,
-            history.step,
-            window_start
+            history.total_added, history_start, history.step, window_start
         )
 
         local prod_max = utils.sumby(
-            item.producers,
-            function(prod)
+            item.producers, function(prod)
                 return TICKS_PER_SECOND / prod.ticks * prod.amount
             end
         )
 
         local cons_rate = calc_history_rate(
-            history.total_removed,
-            history_start,
-            history.step,
-            window_start
+            history.total_removed, history_start, history.step, window_start
         )
 
         local cons_max = utils.sumby(
-            item.consumers,
-            function(cons)
+            item.consumers, function(cons)
                 return TICKS_PER_SECOND / cons.ticks * cons.amount
             end
         )
@@ -248,7 +252,7 @@ local function get_item_stats(faction, with_orders)
     return stats
 end
 
-ProdMonitor.stats = {
+package.stats = {
     get_logistic_graph = get_logistic_graph,
     get_item_stats = get_item_stats,
 }

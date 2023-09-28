@@ -1,5 +1,7 @@
-local stats = ProdMonitor.stats
-local utils = ProdMonitor.utils
+local package = ...
+
+local stats = package.data.stats
+local utils = package.data.utils
 
 local ITEM_TAGS<const> = {
     "resource",
@@ -52,7 +54,7 @@ function ProdMonitorPanel:render()
     if self.selected_view == VIEW_ITEMS then
         self:render_item_stats()
     else
-        unreachable()
+        utils.unreachable()
     end
 end
 
@@ -63,7 +65,11 @@ function ProdMonitorPanel:render_item_stats()
 
     local tags = {}
     for _, tag in ipairs(ITEM_TAGS) do
-        tags[tag] = self.content:Add("VerticalList", { child_padding = 4 })
+        tags[tag] = self.content:Add(
+            "VerticalList", {
+                child_padding = 4,
+            }
+        )
     end
 
     local get_list = function(item_def)
@@ -76,20 +82,22 @@ function ProdMonitorPanel:render_item_stats()
         local list = get_list(item_stats.item_def)
         if list and filter_pred(item_stats.item_def) then
             -- TODO Add toggle for per-second instead of per-minute... maybe?
-            list:Add("ProdMonitorRow", {
-                item_def = item_stats.item_def,
+            list:Add(
+                "ProdMonitorRow", {
+                    item_def = item_stats.item_def,
 
-                producers = item_stats.producers,
-                production = item_stats.production * 60,
-                production_max = item_stats.production_max * 60,
+                    producers = item_stats.producers,
+                    production = item_stats.production * 60,
+                    production_max = item_stats.production_max * 60,
 
-                consumers = item_stats.consumers,
-                consumption = item_stats.consumption * 60,
-                consumption_max = item_stats.consumption_max * 60,
+                    consumers = item_stats.consumers,
+                    consumption = item_stats.consumption * 60,
+                    consumption_max = item_stats.consumption_max * 60,
 
-                ordered = item_stats.ordered,
-                carried = item_stats.carried,
-            })
+                    ordered = item_stats.ordered,
+                    carried = item_stats.carried,
+                }
+            )
         end
     end
 end

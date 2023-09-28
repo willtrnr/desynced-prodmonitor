@@ -1,4 +1,6 @@
-local utils = ProdMonitor.utils
+local package = ...
+
+local utils = package.data.utils
 
 local ProdMonitorSideBar_layout<const> = [[
     <Canvas>
@@ -42,8 +44,7 @@ function ProdMonitorSideBar:on_open_click(btn)
     end
 
     UI.MenuPopup(
-        layout,
-        {
+        layout, {
             construct = function()
                 if parent then
                     parent.prodmonitor_window = self
@@ -59,8 +60,7 @@ function ProdMonitorSideBar:on_open_click(btn)
                         btn.active = false
                     end
                 end
-            end
-        },
-        btn, "RIGHT", "TOP", 8, -4
+            end,
+        }, btn, "RIGHT", "TOP", 8, -4
     )
 end

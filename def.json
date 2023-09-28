@@ -7,11 +7,20 @@
     "homepage": "https://github.com/willtrnr/desynced-prodmonitor",
     "description": "Provides additional production and logistric metrics.",
     "packages": {
+        "Data": {
+            "name": "Data",
+            "type": "Addon",
+            "entry": "data/data.lua",
+            "dependencies": [
+                "Main/Data"
+            ]
+        },
         "UI": {
             "name": "UI",
             "type": "Addon",
             "entry": "src/ui.lua",
             "dependencies": [
+                "ProdMonitor/Data",
                 "Main/UI"
             ]
         }

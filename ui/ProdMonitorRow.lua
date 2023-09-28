@@ -1,4 +1,6 @@
-local utils = ProdMonitor.utils
+local package = ...
+
+local utils = package.data.utils
 
 local ProdMonitorCell_layout<const> = [[
     <VerticalList width={width} height={height} child_align={child_align}>
@@ -136,5 +138,9 @@ function ProdMonitorRow:construct()
 end
 
 function ProdMonitorRow:on_item_click()
-   OpenMainWindow("Faction", { show_item_id = self.item_id })
+    OpenMainWindow(
+        "Faction", {
+            show_item_id = self.item_id,
+        }
+    )
 end
