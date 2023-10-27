@@ -15,18 +15,22 @@ release_tag() {
 }
 
 release_build() {
-  make dist
+  make clean && make dist
 }
 
 release_upload() {
-    "$UPLOADER" -u "$WORKSHOP_ID" prodmonitor.zip
+  "$UPLOADER" -u "$WORKSHOP_ID" prodmonitor.zip
 }
 
 release_prepare_next() {
   local parts=($(echo "$VERSION" | tr '.' ' '))
 
-  local next="${parts[0]}.${parts[1]}.$((${parts[2]} + 1))"
-  local next_code=$((${parts[2]} + ${parts[1]} * 1000 + ${parts[0]} * 100000 + 1))
+  local next="${parts[0]}.${parts[1]}.$((parts[2] + 1))"
+  local next_code=$((
+    parts[0] * 100000 + 1 +
+    parts[1] * 1000 +
+    parts[2]
+  ))
 
   sed -i \
     -e 's/"version_name": ".*"/"version_name": "'"$next"'"/' \

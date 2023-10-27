@@ -7,12 +7,15 @@ ZIPFLAGS =
 LUAFMT := lua-format
 LUAFMTFLAGS =
 
+LUAROCKS := luarocks
+LUAROCKSFLAGS =
+
 LUAPACK := luapack
 LUAPACKFLAGS = -vv \
+	-p "$(shell $(LUAROCKS) path --lr-path || true)" \
 	-p $(srcdir)/?.lua \
 	-p $(builddir)/?.lua \
-	-p $(builddir)/?.bundle.lua \
-	--preload=desynced=desynced.lua
+	-p $(builddir)/?.bundle.lua
 
 
 name := prodmonitor
@@ -24,16 +27,17 @@ builddir := build
 packages := data ui
 
 
+ui_LUAPACKFLAGS = --preload=data.=$(srcdir)/modpack.lua
+
+
 sources := $(shell find $(srcdir) -name '*.lua' 2>/dev/null)
 
 resources := $(shell find $(resdirs) ! -type d 2>/dev/null)
 resources += def.json LICENSE
 
 objects := $(patsubst $(srcdir)/%,$(builddir)/%,$(sources))
-
 bundles := $(addprefix $(builddir)/,$(addsuffix .bundle.lua,$(packages)))
 
-ui_LUAPACKFLAGS := --preload=data.=modpack.lua
 
 .PHONY: all clean dist format
 
