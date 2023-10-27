@@ -10,7 +10,7 @@
         "Data": {
             "name": "Data",
             "type": "Addon",
-            "entry": "data/data.lua",
+            "entry": "build/data.bundle.lua",
             "dependencies": [
                 "Main/Data"
             ]
@@ -18,7 +18,7 @@
         "UI": {
             "name": "UI",
             "type": "Addon",
-            "entry": "ui/ui.lua",
+            "entry": "build/ui.bundle.lua",
             "dependencies": [
                 "ProdMonitor/Data",
                 "Main/UI"

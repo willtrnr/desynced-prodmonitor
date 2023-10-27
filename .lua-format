@@ -1,5 +1,5 @@
-column_limit: 100
-indent_width: 4
+column_limit: 120
+indent_width: 3
 line_separator: lf
 
 keep_simple_control_block_one_line: false

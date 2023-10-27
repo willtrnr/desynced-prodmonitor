@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "diagnostics.globals": [
+    "require"
+  ],
+  "runtime.builtin": {
+    "debug": "disable",
+    "ffi": "disable",
+    "io": "disable",
+    "jit": "disable",
+    "os": "disable",
+    "package": "disable"
+  },
+  "runtime.version": "Lua 5.4"
+}
