@@ -2,7 +2,7 @@ local Desynced<const> = require("desynced")
 
 local OpenMainWindow<const> = Desynced.OpenMainWindow
 
-local numformat<const> = require("data.utils").numformat
+local numformat<const> = require("data").utils.numformat
 
 local ProdMonitorCell_layout<const> = [[
    <VerticalList width={width} height={height} child_align={child_align}>

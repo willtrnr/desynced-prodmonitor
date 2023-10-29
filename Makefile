@@ -12,10 +12,12 @@ LUAROCKSFLAGS =
 
 LUAPACK := luapack
 LUAPACKFLAGS = -vv \
-	-p "$(shell $(LUAROCKS) path --lr-path || true)" \
 	-p $(srcdir)/?.lua \
+	-p $(srcdir)/?/init.lua \
 	-p $(builddir)/?.lua \
-	-p $(builddir)/?.bundle.lua
+	-p $(builddir)/?/init.lua \
+	-p $(builddir)/?.bundle.lua \
+	-p "$(shell $(LUAROCKS) path --lr-path || true)"
 
 
 name := prodmonitor
@@ -27,7 +29,7 @@ builddir := build
 packages := data ui
 
 
-ui_LUAPACKFLAGS = --preload=data.=$(srcdir)/modpack.lua
+ui_LUAPACKFLAGS = --preload=data=$(srcdir)/modpack.lua
 
 
 sources := $(shell find $(srcdir) -name '*.lua' 2>/dev/null)

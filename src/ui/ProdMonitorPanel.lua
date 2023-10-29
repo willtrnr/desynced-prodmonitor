@@ -3,8 +3,10 @@ local Desynced<const> = require("desynced")
 local GetTick<const> = Desynced.Map.GetTick
 local TICKS_PER_SECOND<const> = Desynced.TICKS_PER_SECOND
 
-local get_item_stats<const> = require("data.stats").get_item_stats
-local make_item_filter<const> = require("data.utils").make_item_filter
+local Data<const> = require("data")
+
+local get_item_stats<const> = Data.stats.get_item_stats
+local make_item_filter<const> = Data.utils.make_item_filter
 
 local ProdMonitorRow<const> = require("ui.ProdMonitorRow")
 
