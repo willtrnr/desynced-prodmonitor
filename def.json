@@ -1,8 +1,8 @@
 {
   "id": "ProdMonitor",
   "name": "Production Monitor",
-  "version_name": "0.1.10",
-  "version_code": 1010,
+  "version_name": "0.1.11",
+  "version_code": 1011,
   "author": "Moekumo",
   "homepage": "https://github.com/willtrnr/desynced-prodmonitor",
   "description": "Provides additional production and logistic metrics.",
