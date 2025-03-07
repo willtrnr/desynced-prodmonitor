@@ -1,13 +1,13 @@
-local modpack<const> = ...
+local modpack <const> = ...
 
-local Desynced<const> = require("desynced")
+local Desynced <const> = require("desynced")
 
 function modpack:init_ui()
-   modpack.ProdMonitorSideBar = require("ui.ProdMonitorSideBar")
+    modpack.ProdMonitorSideBar = require("ui.ProdMonitorSideBar")
 end
 
 function Desynced.UIMsg.OnSetup()
-   Desynced.UI.AddLayout(modpack.ProdMonitorSideBar)
+    Desynced.UI.AddLayout(modpack.ProdMonitorSideBar)
 end
 
 return modpack

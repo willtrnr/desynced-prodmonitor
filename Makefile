@@ -2,32 +2,29 @@ SHELL := /bin/sh
 
 
 ZIP := $(shell command -v 7z || command -v 7zz)
-ZIPFLAGS =
+ZIPFLAGS :=
 
-LUAFMT := lua-format
-LUAFMTFLAGS =
+LUA := $(shell command -v lua5.4 || command -v lua)
+LUAFLAGS :=
 
 LUAROCKS := luarocks
-LUAROCKSFLAGS =
+LUAROCKSFLAGS :=
+
+STYLUA := stylua
+STYLUAFLAGS := --syntax=Lua54
 
 LUAPACK := luapack
-LUAPACKFLAGS = -vv \
-	-p $(srcdir)/?.lua \
-	-p $(srcdir)/?/init.lua \
-	-p $(builddir)/?.lua \
-	-p $(builddir)/?/init.lua \
-	-p $(builddir)/?.bundle.lua \
-	-p "$(shell $(LUAROCKS) path --lr-path || true)"
+LUAPACKFLAGS := -vv
 
 
 name := prodmonitor
 
 srcdir := src
+testdir := test
 resdirs := skin
 builddir := build
 
 packages := data ui
-
 
 ui_LUAPACKFLAGS = --preload=data=$(srcdir)/modpack.lua
 
@@ -39,6 +36,10 @@ resources += def.json LICENSE
 
 objects := $(patsubst $(srcdir)/%,$(builddir)/%,$(sources))
 bundles := $(addprefix $(builddir)/,$(addsuffix .bundle.lua,$(packages)))
+
+
+export LUA_PATH := $(srcdir)/?.lua;$(srcdir)/?/init.lua;$(builddir)/?.bundle.lua;$(shell $(LUAROCKS) path --lr-path || echo ';')
+export LUA_CPATH := $(shell $(LUAROCKS) path --lr-cpath || echo ';;')
 
 
 .PHONY: all clean dist format
@@ -59,4 +60,4 @@ clean:
 	rm -rf $(name).zip $(builddir)
 
 format: $(sources)
-	$(LUAFMT) $(LUAFMTFLAGS) -i -- $^
+	$(STYLUA) $(STYLUAFLAGS) -- $^

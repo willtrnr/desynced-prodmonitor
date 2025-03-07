@@ -48,3 +48,6 @@ luac.out
 
 # Build output
 /build
+
+# Affinity Designer
+*.afdesign~*

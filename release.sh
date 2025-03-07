@@ -6,7 +6,7 @@ UPLOADER="${UPLOADER:-../../../DesyncedModUploader}"
 WORKSHOP_ID="${WORKSHOP_ID:-3028475425}"
 
 if [ -z "$VERSION" ]; then
-  VERSION="$(python -c 'import json;print(json.load(open("def.json"))["version_name"])')"
+  VERSION="$(jq -r .version_name def.json)"
   [ -n "$VERSION" ] || exit 1
 fi
 
@@ -23,7 +23,8 @@ release_upload() {
 }
 
 release_prepare_next() {
-  local parts=($(echo "$VERSION" | tr '.' ' '))
+  # shellcheck disable=SC2206
+  local parts=(${VERSION/./ /})
 
   local next="${parts[0]}.${parts[1]}.$((parts[2] + 1))"
   local next_code=$((
@@ -32,10 +33,13 @@ release_prepare_next() {
     parts[2]
   ))
 
-  sed -i \
-    -e 's/"version_name": ".*"/"version_name": "'"$next"'"/' \
-    -e 's/"version_code": [0-9]*/"version_code": '"$next_code"'/' \
-    def.json
+  jq -r \
+    --arg next "$next" \
+    --arg next_code "$next_code" \
+    '.version_name = $next | .version_code = ($next_code | tonumber)' \
+    def.json >def.json.new
+
+  mv def.json.new def.json
 
   git add def.json
   git commit -S -m 'Prepare next release'

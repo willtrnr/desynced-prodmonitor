@@ -1,15 +1,27 @@
 {
-  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
-  "diagnostics.globals": [
-    "require"
-  ],
-  "runtime.builtin": {
-    "debug": "disable",
-    "ffi": "disable",
-    "io": "disable",
-    "jit": "disable",
-    "os": "disable",
-    "package": "disable"
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/refs/heads/master/setting/schema.json",
+  "diagnostics": {
+    "globals": [
+      "require"
+    ],
+    "unusedLocalExclude": [
+      "_*"
+    ]
   },
-  "runtime.version": "Lua 5.4"
+  "runtime": {
+    "version": "Lua 5.4",
+    "builtin": {
+      "debug": "disable",
+      "ffi": "disable",
+      "io": "disable",
+      "jit": "disable",
+      "os": "disable",
+      "package": "disable"
+    }
+  },
+  "workspace": {
+    "library": [
+      "types"
+    ]
+  }
 }
