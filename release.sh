@@ -24,7 +24,7 @@ release_upload() {
 
 release_prepare_next() {
   # shellcheck disable=SC2206
-  local parts=(${VERSION/./ /})
+  local parts=(${VERSION//./ })
 
   local next="${parts[0]}.${parts[1]}.$((parts[2] + 1))"
   local next_code=$((
